@@ -132,6 +132,24 @@
     };
   }
 
+  function reorderTasks(tasks, fromTaskId, toTaskId) {
+    if (!Array.isArray(tasks) || !fromTaskId || !toTaskId || fromTaskId === toTaskId) {
+      return tasks;
+    }
+
+    const nextTasks = [...tasks];
+    const fromIndex = nextTasks.findIndex((task) => task.id === fromTaskId);
+    const toIndex = nextTasks.findIndex((task) => task.id === toTaskId);
+
+    if (fromIndex < 0 || toIndex < 0) {
+      return tasks;
+    }
+
+    const [movedTask] = nextTasks.splice(fromIndex, 1);
+    nextTasks.splice(toIndex, 0, movedTask);
+    return nextTasks;
+  }
+
   function saveState(state) {
     const nextState = {
       bedtime: normalizeBedtime(state.bedtime) || '23:30',
@@ -237,6 +255,8 @@
     tasks.forEach((task) => {
       const item = document.createElement('li');
       item.className = `task-item${task.completed ? ' is-complete' : ''}`;
+      item.dataset.taskId = task.id;
+      item.draggable = true;
 
       const main = document.createElement('label');
       main.className = 'task-main';
@@ -342,6 +362,7 @@
       state = saveState(state);
     }
     renderApp(state, elements);
+    let draggedTaskId = null;
 
     function persistAndRender() {
       state = saveState(state);
@@ -400,6 +421,60 @@
       newTaskInput.value = '';
       persistAndRender();
       setMessage(messageElement, 'タスクを追加しました。');
+    });
+
+    taskListElement.addEventListener('dragstart', (event) => {
+      const item = event.target.closest('.task-item');
+      if (!item) {
+        return;
+      }
+
+      draggedTaskId = item.dataset.taskId;
+      item.classList.add('dragging');
+
+      if (event.dataTransfer) {
+        event.dataTransfer.effectAllowed = 'move';
+        event.dataTransfer.setData('text/plain', draggedTaskId);
+      }
+    });
+
+    taskListElement.addEventListener('dragover', (event) => {
+      const item = event.target.closest('.task-item');
+      if (!item || !draggedTaskId) {
+        return;
+      }
+
+      event.preventDefault();
+      taskListElement.querySelectorAll('.task-item').forEach((taskItem) => {
+        taskItem.classList.toggle('drag-over', taskItem === item && taskItem.dataset.taskId !== draggedTaskId);
+      });
+    });
+
+    taskListElement.addEventListener('drop', (event) => {
+      const item = event.target.closest('.task-item');
+      if (!item || !draggedTaskId) {
+        return;
+      }
+
+      event.preventDefault();
+      const targetTaskId = item.dataset.taskId;
+      if (targetTaskId && targetTaskId !== draggedTaskId) {
+        state.tasks = reorderTasks(state.tasks, draggedTaskId, targetTaskId);
+        persistAndRender();
+        setMessage(messageElement, 'タスクの順番を変更しました。');
+      }
+
+      draggedTaskId = null;
+      taskListElement.querySelectorAll('.task-item').forEach((taskItem) => {
+        taskItem.classList.remove('dragging', 'drag-over');
+      });
+    });
+
+    taskListElement.addEventListener('dragend', () => {
+      draggedTaskId = null;
+      taskListElement.querySelectorAll('.task-item').forEach((taskItem) => {
+        taskItem.classList.remove('dragging', 'drag-over');
+      });
     });
 
     taskListElement.addEventListener('change', (event) => {

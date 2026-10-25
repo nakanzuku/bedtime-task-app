@@ -153,6 +153,17 @@ button[type="submit"]:hover,
   background: var(--panel-alt);
   border: 1px solid var(--border);
   border-radius: 12px;
+  cursor: grab;
+  user-select: none;
+}
+
+.task-item.dragging {
+  opacity: 0.6;
+}
+
+.task-item.drag-over {
+  border-color: var(--primary);
+  box-shadow: inset 0 0 0 1px var(--primary);
 }
 
 .task-main {
