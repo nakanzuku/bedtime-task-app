@@ -1,0 +1,67 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#f5f5f5">
+  <title>寝るまでタスク</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <main class="container">
+    <header class="header">
+      <h1>寝るまでタスク</h1>
+      <button id="settings-button" class="secondary-button" type="button">
+        就寝時間を設定
+      </button>
+    </header>
+
+    <section class="sleep-card">
+      <p class="section-label">就寝予定</p>
+      <p id="bedtime" class="bedtime">23:30</p>
+      <p id="countdown" class="countdown">あと -- 時間 -- 分</p>
+    </section>
+
+    <section class="tasks-section">
+      <div class="section-heading">
+        <h2>今日のタスク</h2>
+        <p id="task-progress">0 / 0 完了</p>
+      </div>
+
+      <ul id="task-list" class="task-list"></ul>
+
+      <form id="add-task-form" class="add-task-form">
+        <label for="new-task">タスクを追加</label>
+        <div class="input-row">
+          <input
+            id="new-task"
+            type="text"
+            placeholder="例：洗濯物をたたむ"
+            maxlength="100"
+            required
+          >
+          <button type="submit">追加</button>
+        </div>
+      </form>
+    </section>
+
+    <p id="message" class="message" role="status"></p>
+  </main>
+
+  <dialog id="settings-dialog">
+    <form id="settings-form">
+      <h2>就寝時間の設定</h2>
+      <label for="bedtime-input">寝る予定の時刻</label>
+      <input id="bedtime-input" type="time" value="23:30" required>
+      <div class="dialog-actions">
+        <button id="cancel-settings" class="secondary-button" type="button">
+          キャンセル
+        </button>
+        <button type="submit">保存</button>
+      </div>
+    </form>
+  </dialog>
+</body>
+</html>
